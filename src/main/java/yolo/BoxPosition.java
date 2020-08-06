@@ -37,7 +37,7 @@ public class BoxPosition {
 
         init();
     }
-
+    //保证上下左右的相对位置
     public void init() {
         float tmpLeft = this.left;
         float tmpTop = this.top;

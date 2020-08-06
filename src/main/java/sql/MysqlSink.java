@@ -1,15 +1,13 @@
 package sql;
 
-import DataType.PlateData;
+import datatype.PlateData;
 import config.AppConfig;
 import org.apache.log4j.Logger;
 import org.apache.spark.sql.ForeachWriter;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 
 import java.io.Serializable;
 import java.sql.*;
-import java.text.MessageFormat;
 
 public class MysqlSink extends ForeachWriter<PlateData> implements Serializable {
     String url;
@@ -34,6 +32,7 @@ public class MysqlSink extends ForeachWriter<PlateData> implements Serializable 
     public boolean open(long partitionId,  long version) {
         //open 和close 的次数 过多，需要资源吗？
         try {
+
             // 必须在这里初始化 这里是会变得地方，想办法抽象出来
             mysql = new TrackSql(AppConfig.MYSQL_CONNECT_URL,AppConfig.MYSQL_USER_NAME,AppConfig.MYSQL_USER_PASSWD);//初始化 连接不能序列化
 
@@ -42,7 +41,9 @@ public class MysqlSink extends ForeachWriter<PlateData> implements Serializable 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("open " + mysql);
+        System.out.println("partitionid " + partitionId);
+        System.out.println("url " + this.url);
+        System.out.println("version " + version);
         if(mysql != null)
             return true;
         else

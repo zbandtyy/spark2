@@ -7,25 +7,25 @@ package imageutil;
  * @modified By：
  * @version: $
  */
+
+import detection.Box;
+import lombok.extern.log4j.Log4j;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
+import pr.PlateInfo;
+
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Rect;
-import org.opencv.imgcodecs.Imgcodecs;
-import pr.PlateInfo;
-
-import javax.imageio.ImageIO;
-
 import static org.opencv.core.CvType.CV_8UC3;
-
+@Log4j(topic =  "app2.ImageEdit")
 public class ImageEdit {
     public static BufferedImage createImageFromBytes(final byte[] imageData) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
@@ -36,6 +36,13 @@ public class ImageEdit {
         }
     }
 
+    /***
+     *
+     * @param image
+     * @param plates
+     * @return 返回的是像素数组
+     * @throws IOException
+     */
     public static byte[] editPlateInfos(byte[] image, List<PlateInfo> plates) throws IOException {
 
         BufferedImage bimage = createImageFromBytes(image);
@@ -45,12 +52,14 @@ public class ImageEdit {
         g.setFont(new Font("宋体",Font.BOLD,15)); //字体、字型、字号
 
         for (int i = 0; i < plates.size(); i++) {
+
             g.setColor(mycolor);
-            Rect region = plates.get(i).getRoi();
-            g.drawRect( region.x +15, region.y +15,  region.width - 20 ,region.height -20);
-            g.fillRect(region.x + 15 ,region.y,15*7,15);
+            Box region = plates.get(i).getBox();
+            log.info("annoted Image region" + region);
+           // g.drawRect( (int)(region.x +15), (int)(region.y +15),  (int)(region.w - 20) ,(int)(region.h -20));
+            g.fillRect((int)(region.x ) ,(int)(region.y - 15),15*7,15);
             g.setColor(Color.WHITE);
-            g.drawString(plates.get(i).getName(),region.x + 15,region.y + 15); //画文字
+            g.drawString(plates.get(i).getName(),region.x ,region.y ); //画文字
         }
         g.dispose();
         byte[] data = ((DataBufferByte) bimage.getData().getDataBuffer()).getData();

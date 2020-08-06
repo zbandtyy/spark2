@@ -23,7 +23,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -50,7 +49,17 @@
         <version>1.2.17</version>
         <scope>compile</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.16.18</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+    </dependency>
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
@@ -59,98 +68,115 @@
   </dependencies>
 
   <build>
-<!--   1. 配置资源目录-->
-    <resources>
-      <resource>
-        <directory>${basedir}/src/resources</directory>
-      </resource>
-    </resources>
-<!--    <>&lt;!&ndash; lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) &ndash;&gt;-->
+      <!--   1. 配置资源目录-->
+      <resources>
+        <resource>
+          <directory>${basedir}/src/resources</directory>
+        </resource>
+      </resources>
       <plugins>
-        <!--2. clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <!--打包跳过测试类-->
         <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>3.1.0</version>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <testFailureIgnore>true</testFailureIgnore>
+            <skip>true</skip>
+          </configuration>
         </plugin>
-        <!--3.  编译器配置-->
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
             <source>8</source>
             <target>8</target>
           </configuration>
-          <version>3.8.0</version>
         </plugin>
-      <!-- 4.       打包配置-->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!--    1.         指定启动类，将依赖打成外部jar包 -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.0.0</version>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <!-- 将静态资源排除出jar包 -->
+            <excludes>
+              <exclude>video/*</exclude>
+              <exclude>video/4k2/*</exclude>
+              <exclude>video/4k6/*</exclude>
+              <exclude>video/4k9/*</exclude>
+            </excludes>
+            <archive>
+              <!-- 生成的jar中，不要包含pom.xml和pom.properties这两个文件 -->
+              <addMavenDescriptor>false</addMavenDescriptor>
+              <manifest>
+                <!-- 是否要把第三方jar加入到类构建路径 -->
+                <addClasspath>true</addClasspath>
+                <!-- 外部依赖jar包的最终位置 -->
+                <classpathPrefix>/home/user/Apache/App2/tracker/lib/</classpathPrefix>
+                <useUniqueVersions>false</useUniqueVersions>
+                <!-- 项目启动类 -->
+                <mainClass>ReadPhoto</mainClass>
+              </manifest>
+              <manifestEntries>
+                <!--MANIFEST.MF 中 Class-Path 加入资源文件目录 -->
+                <Class-Path>config/</Class-Path>
+              </manifestEntries>
+            </archive>
+            <!-- 指定打出的jar包路径 -->
+            <outputDirectory>${project.build.directory}</outputDirectory>
+          </configuration>
+        </plugin>
+
+
+        <!--2.拷贝依赖到jar外面的lib目录-->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
           <executions>
             <execution>
+              <id>copy-lib</id>
               <phase>package</phase>
               <goals>
-                <goal>shade</goal>
-
+                <goal>copy-dependencies</goal>
               </goals>
               <configuration>
-<!--                <minimizeJar>true</minimizeJar>-->
-                <outputDirectory>
-                  ${project.build.directory}\jar\
-                </outputDirectory>
-                <filters>
-                  <filter>
-                    <artifact>*:*</artifact>
-                    <excludes>
-                      <exclude>META-INF/*.SF</exclude>
-                      <exclude>META-INF/*.DSA</exclude>
-                      <exclude>META-INF/*.RSA</exclude>
-                    </excludes>
-                  </filter>
-                </filters>
-                <transformers>
-                  <transformer
-                          implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                    <resource>reference.conf</resource>
-                  </transformer>
-                  <transformer
-                          implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                    <mainClass>Detector</mainClass>
-                  </transformer>
-                </transformers>
+                <outputDirectory>target/lib</outputDirectory>
+                <excludeTransitive>false</excludeTransitive>
+                <stripVersion>false</stripVersion>
+                <includeScope>compile</includeScope>
               </configuration>
             </execution>
           </executions>
         </plugin>
-        <!-- 5拷贝生成包到目的目录 see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
         <plugin>
+          <!--                3..拷贝资源到外面的config目录下-->
           <artifactId>maven-resources-plugin</artifactId>
           <executions>
             <execution>
-              <id>copy-target</id>
+              <!-- 自定义 -->
+              <id>copy-resources</id>
               <phase>package</phase>
               <goals>
+                <!-- 复制静态资源 -->
                 <goal>copy-resources</goal>
               </goals>
               <configuration>
-                <encoding>UTF-8</encoding>
-                <!--打成jar包后复制到的路径-->
-                <outputDirectory>
-                  F:\shared\spark-example\
-                </outputDirectory>
                 <resources>
                   <resource>
-                    <!--项目中的路径-->
-                    <directory> ${project.build.directory}\jar</directory>
+                    <!-- 指定静态资源的路径 -->
+                    <directory>src/main/resources</directory>
+                    <!-- 指定需要复制的文件 -->
                   </resource>
                 </resources>
+                <!-- 指定复制到该目录下 -->
+                <outputDirectory>${project.build.directory}/config</outputDirectory>
               </configuration>
             </execution>
-            <!--可配置多个提取复制路径只需要 “<id>”名字不一样即可-->
           </executions>
-          <version>3.0.2</version>
         </plugin>
       </plugins>
-
-  </build>
+    </build>
 </project>

@@ -1,18 +1,9 @@
 package pr;
 import config.AppConfig;
 import org.apache.log4j.Logger;
-import org.apache.spark.sql.catalyst.expressions.aggregate.Collect;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
 
-import java.io.*;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.opencv.imgcodecs.Imgcodecs.imread;
 
 /**
  * @author ：tyy
@@ -35,7 +26,7 @@ public class PlateRecognition {
          * @param img
          * @return
          */
-        protected native PlateInfo[] plateRecognize(long ptrNative, byte[] img);
+        protected native PlateInfo[] plateRecognize(long ptrNative, int rows,int cols,byte[] img);
 
         /**
          * 初始化加载类的模型文件,只需要model上层的
@@ -95,22 +86,33 @@ public class PlateRecognition {
             return uniqueHyperLPR;
         }
 
-        public ArrayList<PlateInfo> getPlateInfo(byte[] img,double confidenceThreshold) throws UnsupportedEncodingException {
-            logger.warn("plate recognize  initial");
-            PlateInfo[] pi  = plateRecognize(ptrNative, img);
-            logger.warn("plate   sucess");
+        public ArrayList<PlateInfo> getPlateInfo(byte[] img,int rows,int cols,double confidenceThreshold)  {
+
+            if(img.length < rows * cols * 3){
+                logger.warn("NOTE:image size " + img.length + "< required(rows * cols * 3)" + rows * cols * 3 + "，recognize not executed");
+                return  null;
+            }
+            //logger.warn("plate recognize  initial");
+            PlateInfo[] pi  = plateRecognize(ptrNative, rows,cols,img);
+          //  logger.warn("plate   sucess");
             ArrayList<PlateInfo> pA = new ArrayList<>();
             for (int i = 0; i < pi.length; i++) {
-                if(pi[i].confidence > confidenceThreshold) {
-                    String str = new String(pi[i].getName().getBytes(),"utf-8");
-                    pA.add(new PlateInfo(pi[i].getRoi(),str,pi[i].confidence));
+                if(pi[i].confidence >= confidenceThreshold) {
+                    String str = null;
+                    try {
+                        str = new String(pi[i].getName().getBytes(),"utf-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    pA.add(new PlateInfo(pi[i].getPlateRect(),str,pi[i].confidence));
                 }
             }
             return pA;
         }
         static {
             System.load(AppConfig.HYPERLPR_LIB_PATH);
-
+            System.load(AppConfig.OPENCV_LIB_FILE);
+            System.out.println(AppConfig.HYPERLPR_LIB_PATH);
         }
 
         //资源清理

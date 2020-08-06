@@ -33,9 +33,12 @@ DAGScheduler: ResultStage 7 (start at ReadPhoto.java:124) failed in
 33.554 s due to org.apache.spark.shuffle.MetadataFetchFailedException:
 Missing an output location for shuffle 3	at
 ### 3. 关于HyperLPR
+    （1）F:\LPR\HyperLPR\Prj-Linux\lpr 是hyperlpr的主要目录
+    （2）
     编译：
         需要更改cmakeFile中的OPENCV_DIR 
-        需要更改jni的头文件    
+        需要更改F:\LPR\HyperLPR\Prj-Linux\lpr\jni\include jni的pr_PlateRecognition.h头文件  
+    （3）批之间的割裂感严重、相同的数据相似的时候  （可以加上区域信息进行修正，保持一致即可）      
  ## 4.关于运行yolo出错
  java.lang.NegativeArraySizeException at
  Detector.computeBoxesAndAccByInputBytes(Native Method) at

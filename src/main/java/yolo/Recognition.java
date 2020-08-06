@@ -1,10 +1,11 @@
 package yolo;
 
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
+import lombok.extern.log4j.Log4j;
 
 /**
  * An immutable result returned by a recognizer describing what was recognized.
  */
+@Log4j
 public final class Recognition {
     /**
      * A unique identifier for what has been recognized. Specific to the class, not the instance of
@@ -37,6 +38,7 @@ public final class Recognition {
     }
 
     public BoxPosition getScaledLocation(final float scaleX, final float scaleY) {
+
         return new BoxPosition(location, scaleX, scaleY);
     }
 

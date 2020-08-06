@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     pr_PlateRecognition
  * Method:    plateRecognize
- * Signature: (J[B)[Lpr/PlateInfo;
+ * Signature: (JII[B)[Lpr/PlateInfo;
  */
 JNIEXPORT jobjectArray JNICALL Java_pr_PlateRecognition_plateRecognize
-  (JNIEnv *, jobject, jlong, jbyteArray);
+  (JNIEnv *, jobject, jlong, jint, jint, jbyteArray);
 
 /*
  * Class:     pr_PlateRecognition
