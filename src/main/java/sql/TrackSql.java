@@ -1,5 +1,4 @@
 package sql;
-import config.AppConfig;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
@@ -14,20 +13,12 @@ public class TrackSql implements Serializable {
     /**
      * 试图让他只能调用一次，How to do？多线程？？？进来两次也没关系吧，喵？
      * 如果有两个线程同时进来，怎么办？对于cnn和stat 肯定有泄漏，但是getConnection是单例模式
-     * @param url
-     * @param user
-     * @param passwd
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    public  TrackSql(String url,String user,String passwd) throws ClassNotFoundException, SQLException {
-        //1.注册数据库的驱动
-        if(conn == null) {
-            Class.forName(AppConfig.MYSQL_JDBC_CLASSNAME);
-            //2.获取数据库连接（里面内容依次是："jdbc:mysql://主机名:端口号/数据库名","用户名","登录密码"）
-            conn = DriverManager.getConnection(url, user, passwd);
-            stat = conn.createStatement();
-        }
+    public  TrackSql() throws ClassNotFoundException, SQLException {
+        conn  = JDBCUtils.getConnection();
+        stat = conn.createStatement();
     }
     //创建表
     public void createTable() throws SQLException {
@@ -126,19 +117,16 @@ public class TrackSql implements Serializable {
         return  null;
     }
     public void close() throws SQLException {
-        if(ps != null && conn != null && stat !=null ) {
-            ps.close();
-            conn.close();
-            stat.close();
-        }
+        JDBCUtils.close(stat);
+        JDBCUtils.close(conn);
     }
     //4.test
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        TrackSql sql = new TrackSql("jdbc:mysql://115.157.201.214/tracker?user=root&serverTimezone=UTC","root","123456");
+        TrackSql sql = new TrackSql();
         sql.createTable();
         System.out.println(sql.getCameraInfoByCID("video-01"));
         System.out.println(sql.getVehicleInfoByPlateStr("苏E05EV8"));
-        TrackTable track = sql.getTrackByPlateStr("苏E05EV8");
+        TrackTable track = sql.getTrackByPlateStr("京H111L1");
         System.out.println(track);
         sql.close();
     }

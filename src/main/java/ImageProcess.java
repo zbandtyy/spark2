@@ -3,8 +3,10 @@ import datatype.VideoEventData;
 import datatype.YOLOIdentifyData;
 import lombok.extern.log4j.Log4j;
 import org.opencv.core.Size;
+import sql.MySqlOpration;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,6 +60,15 @@ public class ImageProcess {
         log.warn("preparing process " + sortedList.size() + "frames");
 
         return sortedList;
+    }
+    public  static void saveAsMysql(List<PlateData> list) throws SQLException, ClassNotFoundException {
+
+        MySqlOpration.init();
+        for (PlateData plateData : list) {
+
+            MySqlOpration.process(plateData);
+        }
+        MySqlOpration.close();
     }
 
 

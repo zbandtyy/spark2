@@ -93,6 +93,8 @@ public class ReadPhoto {
                 List<YOLOIdentifyData> processed = YOLOv3Recoginize.processTrack(key,inputdata ,false);
                 List<PlateData> pr = PlateProcessing.process(key,inputdata ,false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
                 ImageProcess.changeAndAnnotateImage(processed,pr,inputdata,new Size(640,480));
+                //有保存到数据库的操作
+                ImageProcess.saveAsMysql(pr);
                 System.out.println("======end process===================");
                 return pr.iterator();
             }

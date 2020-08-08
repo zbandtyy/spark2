@@ -16,8 +16,8 @@ import java.util.Properties;
  * @version: $
  */
 public class AppConfig implements Serializable {
-    public static  final  String  KAFKA_CONFIG_FILE= "/home/user/Apache/App2/tracker/exe/stream-processor.properties";//包含所有可配置的路径！！！
-    //public static  final  String  KAFKA_CONFIG_FILE= "E:\\spark\\spark2\\src\\resources\\stream-processor.properties";//windows
+  //  public static  final  String  KAFKA_CONFIG_FILE= "/home/user/Apache/App2/tracker/exe/stream-processor.properties";//包含所有可配置的路径！！！
+    public static  final  String  KAFKA_CONFIG_FILE= "E:\\spark\\spark2\\src\\resources\\stream-processor.properties";//windows
 
     public  static    String OPENCV_LIB_FILE="/home/user/Apache/opencv3.4.7-install/lib/libopencv_java347.so";
 
@@ -36,7 +36,7 @@ public class AppConfig implements Serializable {
     public  static    String YOLO_LABEL_FILE="/home/user/Apache/App2/tracker/config/coco.names";
     public  static    String EASYPR_LABLE_PATH="/home/user/Apache/EasyPR-install/libeasyprjni.so";
 
-    public  static    String MYSQL_CONNECT_URL="jdbc:mysql://10.68.243.135/tracker?user=root&serverTimezone=UTC";
+    public  static    String MYSQL_CONNECT_URL="jdbc:mysql://115.157.201.214:3306/tracker?user=root&serverTimezone=UTC";
     public  static    String MYSQL_USER_NAME="root";
     public  static    String MYSQL_USER_PASSWD="123456";
     public  static    String MYSQL_JDBC_CLASSNAME="com.mysql.cj.jdbc.Driver";

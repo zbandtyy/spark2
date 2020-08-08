@@ -1,13 +1,11 @@
 package sql;
 
 import datatype.PlateData;
-import config.AppConfig;
 import org.apache.log4j.Logger;
 import org.apache.spark.sql.ForeachWriter;
 
-
 import java.io.Serializable;
-import java.sql.*;
+import java.sql.SQLException;
 
 public class MysqlSink extends ForeachWriter<PlateData> implements Serializable {
     String url;
@@ -34,7 +32,7 @@ public class MysqlSink extends ForeachWriter<PlateData> implements Serializable 
         try {
 
             // 必须在这里初始化 这里是会变得地方，想办法抽象出来
-            mysql = new TrackSql(AppConfig.MYSQL_CONNECT_URL,AppConfig.MYSQL_USER_NAME,AppConfig.MYSQL_USER_PASSWD);//初始化 连接不能序列化
+            mysql = new TrackSql();//初始化 连接不能序列化
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -44,10 +42,7 @@ public class MysqlSink extends ForeachWriter<PlateData> implements Serializable 
         System.out.println("partitionid " + partitionId);
         System.out.println("url " + this.url);
         System.out.println("version " + version);
-        if(mysql != null)
-            return true;
-        else
-            return  false;
+        return mysql != null;
     }
 
     /**
@@ -58,7 +53,7 @@ public class MysqlSink extends ForeachWriter<PlateData> implements Serializable 
     @Override
     public void process( PlateData value) {
         System.out.println("start process,the value mysql is" + mysql);
-        String plateStrs[] = value.getPlateStr().split(",");//","车牌以，分割
+        String[] plateStrs = value.getPlateStr().split(",");//","车牌以，分割
         String cameraSeq = value.getCameraId()+":"+value.getTimestamp();//摄像头序列，video：time
         System.out.println("start process,the value mysql is" + value.getPlateStr()+ plateStrs[0]);
         for(String s: plateStrs){

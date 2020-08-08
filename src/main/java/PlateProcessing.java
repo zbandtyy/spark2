@@ -42,7 +42,7 @@ public class PlateProcessing {
 
     }
     /*编辑距离*/
-    public static   long levenshteinDistance(char s1[], char s2[]) {
+    public static   long levenshteinDistance(char[] s1, char[] s2) {
         int len1 = s1.length, len2 = s2.length;
         int[] col = new int[len2 + 1];
         int[] prevCol = new int[len2 + 1];
@@ -80,8 +80,8 @@ public class PlateProcessing {
                 return (int) (o1._2 - o2._2);
             }
         });//2按照分组数量大小进行排序
-        log.warn("updatNormalUsedMajorityRule list: " + String.valueOf(list));
-        log.warn("collect" + String.valueOf(collect));
+        log.warn("updatNormalUsedMajorityRule list: " + list);
+        log.warn("collect" + collect);
         for (int i = 0; i < collectorResult.size(); i++) {
 
             PlateInfo plateInfo = collectorResult.get(i);
@@ -132,8 +132,8 @@ public class PlateProcessing {
                 return (int) (o1._2 - o2._2);
             }
         });//2按照分组数量大小进行排序
-        log.warn("updateNotNormalPlate list:" + String.valueOf(list));
-        log.warn("collect" + String.valueOf(collect));
+        log.warn("updateNotNormalPlate list:" + list);
+        log.warn("collect" + collect);
         for (int i = 0; i < collectorResult.size(); i++) {
             PlateInfo plateInfo = collectorResult.get(i);
             String plateStr = plateInfo.getName();
@@ -214,7 +214,7 @@ public class PlateProcessing {
                 resAll[frmaeCount] = new PlateData(plates,eventData);
                 log.info("识别结果"+resAll[frmaeCount].getPlateStr());
             }
-            System.out.println(resAll[frmaeCount]);
+            //System.out.println(resAll[frmaeCount]);
             //进行数据保存，以防止初始的数据不正确
             resAll[frmaeCount].setCols(frame.cols());
             resAll[frmaeCount].setRows(frame.rows());

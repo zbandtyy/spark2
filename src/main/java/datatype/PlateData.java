@@ -54,8 +54,16 @@ public class PlateData extends VideoEventData implements Serializable {
         }
         return  str;
     }
+
     @Override
-    public  String toString(){
+    public String toString() {
+        return "PlateData{" +
+                "plates=" + plates +
+                '}';
+    }
+
+    @Override
+    public  String toJson(){
         Gson gson = new Gson();
         /**
          * String toJson(Object src)
