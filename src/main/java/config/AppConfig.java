@@ -16,8 +16,8 @@ import java.util.Properties;
  * @version: $
  */
 public class AppConfig implements Serializable {
-  //  public static  final  String  KAFKA_CONFIG_FILE= "/home/user/Apache/App2/tracker/exe/stream-processor.properties";//包含所有可配置的路径！！！
-    public static  final  String  KAFKA_CONFIG_FILE= "E:\\spark\\spark2\\src\\resources\\stream-processor.properties";//windows
+    public static  final  String  KAFKA_CONFIG_FILE= "/home/user/Apache/App2/tracker/exe/stream-processor.properties";//包含所有可配置的路径！！！
+  //  public static  final  String  KAFKA_CONFIG_FILE= "E:\\spark\\spark2\\src\\resources\\stream-processor.properties";//windows
 
     public  static    String OPENCV_LIB_FILE="/home/user/Apache/opencv3.4.7-install/lib/libopencv_java347.so";
 
@@ -77,7 +77,15 @@ public class AppConfig implements Serializable {
                 HYPERLPR_RESOURCE_PATH = prop.getProperty("hyperlpr.resource.path");
             }
 
-
+            if(prop.getProperty("mysql.connect.url") != null ){
+                MYSQL_CONNECT_URL = prop.getProperty("mysql.connect.url");
+            }
+            if(prop.getProperty("mysql.user.name") != null ){
+                MYSQL_USER_NAME = prop.getProperty("mysql.user.name");
+            }
+            if(prop.getProperty("mysql.user.passwd") != null ){
+                MYSQL_USER_PASSWD = prop.getProperty("mysql.user.passwd");
+            }
 
         }
 

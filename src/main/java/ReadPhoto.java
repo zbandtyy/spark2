@@ -58,13 +58,14 @@ public class ReadPhoto {
                 .readStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", prop.getProperty("kafka.bootstrap.servers"))//创建并且订阅了几个kafka主题
-                .option("subscribe"," collector-1920-1080")//prop.getProperty("kafka.topic")
+                .option("assign", "{\"collector-1920-1080\":[0]}")
+                //.option("subscribe"," collector-1920-1080")//prop.getProperty("kafka.topic")
                 .option("failOnDataLoss",false)
-                .option("startingOffsets", "{\"collector-1920-1080\":{\"0\":10}}")//必须指定全部
+                .option("startingOffsets", "{\"collector-1920-1080\":{\"0\":0}}")//必须指定全部
                 .option("kafka.max.partition.fetch.bytes", prop.getProperty("kafka.max.partition.fetch.bytes"))
                 .option("kafka.max.poll.records", prop.getProperty("kafka.max.poll.records"))
                 .option("maxOffsetsPerTrigger","20")//开了最多的200个Ta sk处理全部的历史数据，groupby的时候shuffle存储空间不够，应该限制接受的一批 数据大小
-               // .option("startingOffsets", "earliest")
+                //.option("startingOffsets", "earliest")
                 //.option("endingOffsets", "{\"video-kafka-large\":{\"0\":50,\"1\":-1}")
                 .load();
         logger.warn("subscribe" + prop.getProperty("kafka.topic"));
