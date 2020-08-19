@@ -2,11 +2,13 @@ package yolo;
 
 import lombok.extern.log4j.Log4j;
 
+import java.io.Serializable;
+
 /**
  * An immutable result returned by a recognizer describing what was recognized.
  */
 @Log4j
-public final class Recognition {
+public final class Recognition implements Serializable {
     /**
      * A unique identifier for what has been recognized. Specific to the class, not the instance of
      * the object.

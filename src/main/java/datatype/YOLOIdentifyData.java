@@ -2,6 +2,7 @@ package datatype;
 
 import detection.BoxesAndAcc;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * @modified By：
  * @version: $
  */
+@NoArgsConstructor
 public class YOLOIdentifyData extends VideoEventData {
     @Setter @Getter
     private List<BoxesAndAcc> carsPoses;

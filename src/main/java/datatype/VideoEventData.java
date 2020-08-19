@@ -25,7 +25,7 @@ import java.util.Base64;
 public class VideoEventData implements Serializable {
 	@Setter @Getter
 	private String cameraId;
-	SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
+
 	public VideoEventData(String cameraId, Timestamp timestamp, int rows, int cols, int type, String data) {
 
 		this.cameraId = cameraId;
@@ -56,7 +56,7 @@ public class VideoEventData implements Serializable {
 		this.data = data;
 	}
 	@Setter @Getter
-	private Timestamp timestamp;
+	 private Timestamp timestamp;
 	@Setter @Getter
 	private int rows;
 	@Setter @Getter
@@ -67,8 +67,8 @@ public class VideoEventData implements Serializable {
 	private byte[] jpgImageBytes = null;
 	@Setter  @Getter
 	private String data;
-	@Getter @Setter
-	private String generateFrameTime = null;
+	//@Getter @Setter
+	//private String generateFrameTime = null;
 	public byte[] getImagebytes() {
 		if(this.getData() == null){
 			return  jpgImageBytes;
@@ -130,13 +130,13 @@ public class VideoEventData implements Serializable {
 	public String toString() {
 		return "VideoEventData{" +
 				"cameraId='" + cameraId + '\'' +
-				", timestamp=" + sdf.format(timestamp.getTime()) +
+				", timestamp=" + new SimpleDateFormat("mm:ss:SSS").format(timestamp.getTime()) +
 				", rows=" + rows +
 				", cols=" + cols +
 				", type=" + type +
 				", jpgImageBytes=" + (jpgImageBytes==null) +
 				", data='"  + (data == null) + '\'' +
-				",generateFrameTime=" +(generateFrameTime) +
+				//",generateFrameTime=" +(generateFrameTime) +
 				'}';
 	}
 

@@ -31,7 +31,7 @@ public class ReadPhoto {
         //使用 Dataset 或者 Datafram 编写 Spark SQL 应用的时候，第一个要创建的对象就是 SparkSession。
         SparkSession spark = SparkSession
                 .builder()//使用builer创建sparkSession的实例
-                .appName("VideoStreamProcessor123457")
+                .appName("app2")
                 .master(prop.getProperty("spark.master.url"))//设置主要的spark 环境  spark://mynode1:7077
                 .getOrCreate();	//获取或者创建一个新的sparksession
 
@@ -58,14 +58,14 @@ public class ReadPhoto {
                 .readStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", prop.getProperty("kafka.bootstrap.servers"))//创建并且订阅了几个kafka主题
-                .option("assign", "{\"collector-1920-1080\":[0]}")
-                //.option("subscribe"," collector-1920-1080")//prop.getProperty("kafka.topic")
+                //.option("assign", "{\"app2-input\":[0]}")
+                .option("subscribe",prop.getProperty("kafka.topic"))//
                 .option("failOnDataLoss",false)
-                .option("startingOffsets", "{\"collector-1920-1080\":{\"0\":0}}")//必须指定全部
+               // .option("startingOffsets", "{\"app2-input\":{\"0\":0}}")//必须指定全部
                 .option("kafka.max.partition.fetch.bytes", prop.getProperty("kafka.max.partition.fetch.bytes"))
                 .option("kafka.max.poll.records", prop.getProperty("kafka.max.poll.records"))
-                .option("maxOffsetsPerTrigger","20")//开了最多的200个Ta sk处理全部的历史数据，groupby的时候shuffle存储空间不够，应该限制接受的一批 数据大小
-                //.option("startingOffsets", "earliest")
+                .option("maxOffsetsPerTrigger","5")//开了最多的200个Ta sk处理全部的历史数据，groupby的时候shuffle存储空间不够，应该限制接受的一批 数据大小
+                .option("startingOffsets", "earliest")
                 //.option("endingOffsets", "{\"video-kafka-large\":{\"0\":50,\"1\":-1}")
                 .load();
         logger.warn("subscribe" + prop.getProperty("kafka.topic"));
@@ -85,29 +85,65 @@ public class ReadPhoto {
         }, Encoders.STRING());
        /////////////////// //1. YOLO识别测试//////// json数据 + data为jpg格式///////////////////////////////////
 
-        Dataset<PlateData> dfTrack = kvDataset.flatMapGroups(new FlatMapGroupsFunction<String, VideoEventData, PlateData>() {
+        Dataset<YOLOIdentifyData> dfTrack = kvDataset.flatMapGroups(new FlatMapGroupsFunction<String, VideoEventData, YOLOIdentifyData>() {
             @Override
-            public Iterator<PlateData> call(String key, Iterator<VideoEventData> values) throws Exception {
+            public Iterator<YOLOIdentifyData> call(String key, Iterator<VideoEventData> values) throws Exception {
                 // classify image  key 是cameraid    values是数据集
                 System.out.println("======start process===================");
                 ArrayList<VideoEventData> inputdata = ImageProcess.loadAndSortData(values);
                 List<YOLOIdentifyData> processed = YOLOv3Recoginize.processTrack(key,inputdata ,false);
-                List<PlateData> pr = PlateProcessing.process(key,inputdata ,false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
-                ImageProcess.changeAndAnnotateImage(processed,pr,inputdata,new Size(640,480));
-                //有保存到数据库的操作
-                ImageProcess.saveAsMysql(pr);
-                System.out.println("======end process===================");
+//                List<PlateData> pr = PlateProcessing.process(key,inputdata ,false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
+//                ImageProcess.changeAndAnnotateImage(processed,pr,inputdata,new Size(640,480));
+//                //有保存到数据库的操作
+//                ImageProcess.saveAsMysql(pr);
+//                System.out.println("======end process===================");
+                return processed.iterator();
+            }
+        },Encoders.bean(YOLOIdentifyData.class));
+        KeyValueGroupedDataset<String, YOLOIdentifyData> yolo = dfTrack.groupByKey(new MapFunction<YOLOIdentifyData, String>() {
+            @Override
+            public String call(YOLOIdentifyData value) throws Exception {
+                return value.getCameraId();
+            }
+        }, Encoders.STRING());
+
+        Dataset<PlateData> plateDataDataset = yolo.flatMapGroups(new FlatMapGroupsFunction<String, YOLOIdentifyData, PlateData>() {
+            @Override
+            public Iterator<PlateData> call(String key, Iterator<YOLOIdentifyData> values) throws Exception {
+                //1.一批数据处理的图片
+                ArrayList<YOLOIdentifyData> sortedList = new ArrayList<>();
+                while (values.hasNext()) {
+
+                    YOLOIdentifyData raw = values.next();
+                    key = raw.getCameraId();
+                    log.info(String.format("frames rows*cols(%dX%d) before", raw.getRows(), raw.getCols()));
+                    log.info("get data" + raw);
+                    log.info(String.format("frames rows*cols(%dX%d) changed", raw.getRows(), raw.getCols()));
+                    sortedList.add(raw);
+                }
+                sortedList.sort((o1, o2) ->
+                        (int) (o1.getTimestamp().getTime() - o2.getTimestamp().getTime()));
+                logger.warn("the all data is " + sortedList.size());
+                //2.进行车牌识别
+                List<PlateData> pr = PlateProcessing.process(key, sortedList, false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
+                //保存数据结果
+                ImageProcess.changeAndAnnotateImage(sortedList, pr, sortedList, new Size(640, 480));
                 return pr.iterator();
             }
-        },Encoders.bean(PlateData.class));
-        Dataset<Row> djson = dfTrack.map(new MapFunction<PlateData, Tuple2<String, String>>() {
+
+
+        }, Encoders.bean(PlateData.class));
+
+        Dataset<Row> djson = plateDataDataset.map(new MapFunction<PlateData, Tuple2<String, String>>() {
             @Override
             public Tuple2<String, String> call(PlateData pd) throws Exception {
+
 
                 return new Tuple2<>(pd.getCameraId(), pd.toJson());
             }
 
         }, Encoders.tuple(Encoders.STRING(), Encoders.STRING())).toDF("key", "value");
+
 
         StreamingQuery query = djson
                 .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)") //如果Kafka数据记录中的字符存的是UTF8字符串，我们可以用cast将二进制转换成正确类型

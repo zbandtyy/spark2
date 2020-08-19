@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class PlateData extends VideoEventData implements Serializable {
     @Getter @Setter
-    private List<PlateInfo> plates ;//存储多个车牌
+    transient  private List<PlateInfo> plates ;//存储多个车牌
 
     public  PlateData(List<PlateInfo> plateInfos,VideoEventData ed){
         this(plateInfos,ed.getTimestamp(),ed.getCameraId(),ed.getRows(),ed.getCols(),ed.getType(),ed.getImagebytes());
@@ -64,14 +64,8 @@ public class PlateData extends VideoEventData implements Serializable {
 
     @Override
     public  String toJson(){
-        Gson gson = new Gson();
-        /**
-         * String toJson(Object src)
-         * 将对象转为 json，如 基本数据、POJO 对象、以及 Map、List 等
-         * 注意：如果 POJO 对象某个属性的值为 null，则 toJson(Object src) 默认不会对它进行转化
-         * 结果字符串中不会出现此属性
-         */
-        String json = gson.toJson(this);
+        String json = new Gson().toJson(this
+        );
         return  json;
 
     }

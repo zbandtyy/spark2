@@ -24,9 +24,10 @@ public class ImageProcess {
      * 在这里的数据 YOLOIdentifyData和PlateData 是一样的
      * @param process  进行yolo识别的数据结果，必须包含识别框
      * @param pr  进行车牌识别的结果，必须包含车牌的位置
+     *  @param input:中间用于保存yolo的识别框，最后用于保存车牌识别的图片数据（中间进行数据交换的data）
      * @param size  最后需要保存的图片的大小
      */
-    public static List<PlateData> changeAndAnnotateImage(List<YOLOIdentifyData> process, List<PlateData> pr,List<VideoEventData>input, Size size) throws IOException {
+    public static List<PlateData> changeAndAnnotateImage(List<YOLOIdentifyData> process, List<PlateData> pr,List<? extends VideoEventData>input, Size size) throws IOException {
         //NOTE：更好的是传递videoEventdata进行修改
         //1.根据yolo识别的结果对车牌识别pr进行更新，主要是更新车牌绘制的位置为车辆的上方，如果不需要更改位置，则不用动
         PlateProcessing.updatePlatePos(process,pr);
@@ -37,7 +38,7 @@ public class ImageProcess {
         //4.保存图片数据，退出 （主要保存车牌识别的结果）
         return  pr;
     }
-    public static ArrayList<VideoEventData> loadAndSortData(Iterator<VideoEventData> frames) {
+    public static ArrayList<VideoEventData> loadAndSortData(Iterator<? extends VideoEventData> frames) {
         //Add frames to list
         log.warn("sorted by timestamp");
         //2.一批数据处理的图片
@@ -46,10 +47,6 @@ public class ImageProcess {
 
             VideoEventData raw = frames.next();
             log.info(String.format("frames rows*cols(%dX%d) before",raw.getRows(),raw.getCols() ));
-
-//            raw.setCols(1920);
-//            raw.setRows(1080);
-//            raw.setType(16);
             log.info("get data" + raw);
             log.info(String.format("frames rows*cols(%dX%d) changed",raw.getRows(),raw.getCols() ));
             sortedList.add(raw);
@@ -70,6 +67,9 @@ public class ImageProcess {
         }
         MySqlOpration.close();
     }
+
+
+
 
 
 }

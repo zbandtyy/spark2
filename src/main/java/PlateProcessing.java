@@ -195,7 +195,7 @@ public class PlateProcessing {
      * @param sortedList  所有需要进行车牌检测的视频帧
      * @return
      */
-    public static  PlateData[] detectAndRecognize(List<VideoEventData> sortedList)  {
+    public static  PlateData[] detectAndRecognize(List<? extends  VideoEventData> sortedList)  {
         log.warn("start detect plates AndRecognize");
         PlateData[] resAll = new PlateData[sortedList.size()];
         PlateRecognition pl =  PlateRecognition.getHyperLPR(AppConfig.HYPERLPR_RESOURCE_PATH);
@@ -210,12 +210,11 @@ public class PlateProcessing {
             ArrayList<PlateInfo> plates = null;
             if (recognizebyts.length >=  frame.rows()*frame.cols()*frame.channels()) {
                 plates = pl.getPlateInfo(recognizebyts,frame.rows(),frame.cols(),0.7);
-                //3. 保存数据
-                resAll[frmaeCount] = new PlateData(plates,eventData);
-                log.info("识别结果"+resAll[frmaeCount].getPlateStr());
             }
             //System.out.println(resAll[frmaeCount]);
             //进行数据保存，以防止初始的数据不正确
+            resAll[frmaeCount] = new PlateData(plates,eventData);
+            log.info("识别结果"+resAll[frmaeCount].getPlateStr());
             resAll[frmaeCount].setCols(frame.cols());
             resAll[frmaeCount].setRows(frame.rows());
             resAll[frmaeCount].setType(frame.type());
@@ -290,7 +289,7 @@ public class PlateProcessing {
      * @throws Exception
      */
     //组内的所有视频使用相同的进行车牌识别                  Key         Value                     跳过处理的帧数
-    public static <T> List<PlateData> process(String camId,  List<VideoEventData > sortedList , boolean isAnnotation) throws Exception {
+    public static <T> List<PlateData> process(String camId,  List<? extends VideoEventData > sortedList , boolean isAnnotation) throws Exception {
         ///////////////处理数据/////////////////
         //1.加载原始
         log.warn("cameraId=" + camId + "processed total frames=" + sortedList.size() +"actual size" +  sortedList.size());
@@ -316,7 +315,7 @@ public class PlateProcessing {
      *               plateData.getCols() 进行检测时数据的分辩率
      * @throws IOException
      */
-    public static void annoteScaleImage(List<PlateData> resAll, Size size, List<VideoEventData> inList) throws IOException {
+    public static void annoteScaleImage(List<PlateData> resAll, Size size, List<? extends VideoEventData> inList) throws IOException {
         log.info("annote annoteScaleImage Image");
         //1.获取数据，对数据车牌绘制位置进行更改
         int i = 0;
@@ -355,6 +354,7 @@ public class PlateProcessing {
             //最终形成的数据
             MatOfByte buf = new MatOfByte();
             imencode(".jpg", frame, buf);
+            imwrite("/home/user/Apache/App2/output/outputFile/"+plateData.getTimestamp()+".jpg",frame);
             plateData.setJpgImageBytes(buf.toArray());
             plateData.setCols(frame.cols());
             plateData.setRows(frame.rows());
@@ -362,7 +362,6 @@ public class PlateProcessing {
             plateData.setType(frame.type());
             plateData.setPlates(plates);
             i++;
-
         }
         //2.进行绘制
         annoteImage((PlateData[]) resAll.toArray());
@@ -393,9 +392,9 @@ public class PlateProcessing {
                     MatOfByte mob = new MatOfByte();
                     Imgcodecs.imencode(".jpg", frame, mob);
                     resAll[i].setJpgImageBytes( mob.toArray()); //更新新的编辑图片数据,只需要更新由车牌的数据
-                  //  Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"has-pred.jpg",frame);
+                   // Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"has-pred.jpg",frame);
                 }
-               // Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"res.jpg",frame);
+              //  Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"res.jpg",frame);
 
             }
         }

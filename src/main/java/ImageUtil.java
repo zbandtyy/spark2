@@ -4,8 +4,6 @@ import lombok.extern.log4j.Log4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yolo.BoxPosition;
-import yolo.Config;
-import yolo.IOUtil;
 import yolo.Recognition;
 
 import javax.imageio.ImageIO;
@@ -29,7 +27,7 @@ public class ImageUtil<imageUtil> implements Serializable {
     private static ImageUtil imageUtil;
 
     private ImageUtil() {
-        IOUtil.createDirIfNotExists(new File(Config.OUTPUT_DIR));
+
     }
     public static Map<String, Integer> lableAndClass = null;
 
@@ -125,7 +123,7 @@ public class ImageUtil<imageUtil> implements Serializable {
      * 为labelImage提供位置标识转换的服务函数
      */
     public  List<Recognition> transfor(List< BoxesAndAcc>Box_acc , int w, int h ){
-        List<Recognition>  list =  new ArrayList(); ;
+        List<Recognition>  list =  new ArrayList();
         for (int i = 0; i< Box_acc.size(); i++){
             BoxesAndAcc tmp =  Box_acc.get(i);
             if(tmp.getBoxes().getX() == Float.NEGATIVE_INFINITY || tmp.getBoxes().getY() == Float.POSITIVE_INFINITY ||

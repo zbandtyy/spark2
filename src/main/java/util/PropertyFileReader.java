@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Properties;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Properties;
  * @author abaghel
  *
  */
-public class PropertyFileReader {
+public class PropertyFileReader implements Serializable {
 	private static final Logger logger = Logger.getLogger(PropertyFileReader.class);
 	private static Properties prop = new Properties();
 	public static Properties readPropertyFile() throws Exception {

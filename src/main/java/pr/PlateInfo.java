@@ -16,7 +16,7 @@ public class PlateInfo implements Serializable {
     @Setter @Getter
     double confidence;
     @Setter
-    Rect roi;//必须保留。需要使用！！！！！！！！！！！！
+    transient Rect roi;//必须保留。需要使用！！！！！！！！！！！！
     PlateInfo(){//在jni中需要使用
 
     }

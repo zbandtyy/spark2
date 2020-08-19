@@ -4,9 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class BoxesAndAcc{
+public class BoxesAndAcc implements Serializable {
     public  float acc;
     public Box boxes;
     public String names;

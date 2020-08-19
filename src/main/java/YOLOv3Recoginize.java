@@ -96,7 +96,7 @@ public class  YOLOv3Recoginize implements Serializable {
      * @return
      * @throws IOException
      */
-    public static ArrayList<YOLOIdentifyData> annoteScaleImage(List<YOLOIdentifyData> ed, Size sz,List<VideoEventData> outlist) throws IOException {
+    public static ArrayList<YOLOIdentifyData> annoteScaleImage(List<YOLOIdentifyData> ed, Size sz,List<? extends VideoEventData> outlist) throws IOException {
 
         return annoteImage(ed,sz,outlist);
     }
@@ -110,7 +110,7 @@ public class  YOLOv3Recoginize implements Serializable {
      * @throws IOException
      */
 
-    private static ArrayList<YOLOIdentifyData> annoteImage(List<YOLOIdentifyData> ed,Size sz,List<VideoEventData> outList) throws IOException {
+    private static ArrayList<YOLOIdentifyData> annoteImage(List<YOLOIdentifyData> ed,Size sz,List<? extends VideoEventData> outList) throws IOException {
         log.info("annoteScaleImage yolo");
         //5.1获取整张图片的bytes
         ArrayList<YOLOIdentifyData> result = new ArrayList<>();
