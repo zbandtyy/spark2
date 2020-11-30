@@ -177,7 +177,7 @@
                     <!-- 指定需要复制的文件 -->
                   </resource>
                 </resources>
-                <!-- 指定复制到该目录下 -->
+                <!-- 指定复制到该目录下  对应的jar中-->
                 <outputDirectory>${project.build.directory}/config</outputDirectory>
               </configuration>
             </execution>

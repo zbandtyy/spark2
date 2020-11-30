@@ -53,7 +53,7 @@ public class  YOLOv3Recoginize implements Serializable {
         return ;
     }
     public static  ArrayList<YOLOIdentifyData> recognizeWithYolo(List<VideoEventData> sortedList) {
-
+        log.warn("load yolo success" + AppConfig.YOLO_LIB_FILE);
         Detector obj = Detector.getYoloDetector(AppConfig.YOLO_RESOURCE_PATH);
         ArrayList<YOLOIdentifyData> yolo = new ArrayList<>(sortedList.size());
         for (VideoEventData ev : sortedList) {
@@ -120,16 +120,14 @@ public class  YOLOv3Recoginize implements Serializable {
             byte[] imagebytes = ed.get(i).getImagebytes();
             List<Recognition> recognitions = util.transfor(eventData.getCarsPoses(), eventData.getCols(), eventData.getRows());
             log.info("recognitions before "+recognitions );
-
             Mat imdecode = imdecode(new MatOfByte(imagebytes), CV_LOAD_IMAGE_COLOR);
             //Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+eventData.getTimestamp() + "-yolo-pr.jpg",imdecode);
-
-            //裁剪大小,重新进行编码
+            //裁剪大小,重新进行编码    //所有的数据都会进入，重新调整大小为SZ，同时输出为jpg
             Mat frameResize = imdecode;
             float scaleX = 1.0f;
             float scaleY = 1.0f;
             byte[] editImage = imagebytes;
-            if(sz != null && (sz.width != eventData.getCols() && sz.height != eventData.getRows())) {
+            if(sz != null && (sz.width != eventData.getCols() || sz.height != eventData.getRows())) {
                 frameResize = new Mat((int)sz.height,(int)sz.width,imdecode.channels());
                 resize(imdecode, frameResize, sz);
                 scaleX = (float) (sz.width * 1.0 / eventData.getCols());
@@ -139,19 +137,22 @@ public class  YOLOv3Recoginize implements Serializable {
                 Imgcodecs.imencode(".jpg", frameResize, mob);
                 editImage = mob.toArray();
             }
+            //进行YOLO的方框标注
             byte[] res = util.labelImage(editImage, recognitions,scaleX,scaleY);
             frameResize.put(0,0,res);
             MatOfByte mob = new MatOfByte();
             Imgcodecs.imencode(".jpg", frameResize, mob);
             VideoEventData out = eventData;
             if(outList != null) {
+
                 out = outList.get(i);
                 out.setType(frameResize.type());
                 out.setRows(frameResize.rows());
                 out.setCols(frameResize.cols());
                 out.setJpgImageBytes(mob.toArray());
+                log.warn("yolo  " + out.getJpgImageBytes().length);
             }
-           // Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+eventData.getTimestamp() + ".jpg",frameResize);
+            Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+eventData.getTimestamp() + "-yolo.jpg",frameResize);
             ////////////6.bytes 转换成 Mat开始进行数据封装///////////////////////////////////
             result.add(eventData);
         }

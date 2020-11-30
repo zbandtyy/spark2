@@ -70,14 +70,17 @@ public class VideoEventData implements Serializable {
 	//@Getter @Setter
 	//private String generateFrameTime = null;
 	public byte[] getImagebytes() {
-		if(this.getData() == null){
-			return  jpgImageBytes;
+		if(jpgImageBytes != null){
+			return jpgImageBytes;
 		}
+//		if(this.getData() == null){//开始的版本在data 和 jpg中任意存在其一
+//			return  jpgImageBytes;
+//		}
 		//部分数据传送的原始的像素数组
-		byte[] pic = Base64.getDecoder().decode(this.getData());
-		//	System.out.println(pic.length);
+		byte[] pic = Base64.getDecoder().decode(this.getData());//解析的是string原始数据： 1. 放的是jpg 也可能存储的是 像素数组
+		System.out.println(this.getCols() + " * 3 * " + this.getRows() +" = " + this.getRows()*this.getCols() * 3 );
+		System.out.println("pic.length:  "+ pic.length);
 		if(pic.length >= this.getRows()*this.getCols() * 3) {
-
 			Mat frame = new Mat(this.getRows(), this.getCols(), this.getType());
 			frame.put(0, 0, pic);
 			MatOfByte mob = new MatOfByte();
@@ -85,7 +88,6 @@ public class VideoEventData implements Serializable {
 			return mob.toArray();
 		}else {
 			//有的数据传送的是经过jpg压缩的数据
-
 			return pic;
 		}
 

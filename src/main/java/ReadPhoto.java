@@ -49,9 +49,7 @@ public class ReadPhoto {
                 DataTypes.createStructField("data", DataTypes.StringType, false),
                 DataTypes.createStructField("jpgImageBytes", DataTypes.BinaryType, true)
         });
-
         logger.warn(prop.getProperty("kafka.bootstrap.servers"));
-
         //Create DataSet from stream messages from kafka  配置kafka的数据格式
         //// Subscribe to 1 topic defaults to the earliest and latest offsets
         Dataset<Row> ds1 = spark
@@ -80,7 +78,7 @@ public class ReadPhoto {
         KeyValueGroupedDataset<String, VideoEventData> kvDataset = ds.groupByKey(new MapFunction<VideoEventData, String>() {
             @Override
             public String call(VideoEventData value) throws Exception {
-                return value.getCameraId();
+                return value  .getCameraId();
             }
         }, Encoders.STRING());
        /////////////////// //1. YOLO识别测试//////// json数据 + data为jpg格式///////////////////////////////////
@@ -92,53 +90,51 @@ public class ReadPhoto {
                 System.out.println("======start process===================");
                 ArrayList<VideoEventData> inputdata = ImageProcess.loadAndSortData(values);
                 List<YOLOIdentifyData> processed = YOLOv3Recoginize.processTrack(key,inputdata ,false);
-//                List<PlateData> pr = PlateProcessing.process(key,inputdata ,false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
-//                ImageProcess.changeAndAnnotateImage(processed,pr,inputdata,new Size(640,480));
+                List<PlateData> pr = PlateProcessing.process(key,inputdata ,false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
+                ImageProcess.changeAndAnnotateImage(processed,pr,inputdata,new Size(640,480));
 //                //有保存到数据库的操作
 //                ImageProcess.saveAsMysql(pr);
 //                System.out.println("======end process===================");
                 return processed.iterator();
             }
         },Encoders.bean(YOLOIdentifyData.class));
-        KeyValueGroupedDataset<String, YOLOIdentifyData> yolo = dfTrack.groupByKey(new MapFunction<YOLOIdentifyData, String>() {
+//        KeyValueGroupedDataset<String, YOLOIdentifyData> yolo = dfTrack.groupByKey(new MapFunction<YOLOIdentifyData, String>() {
+//            @Override
+//            public String call(YOLOIdentifyData value) throws Exception {
+//                return value.getCameraId();
+//            }
+//        }, Encoders.STRING());
+
+//        Dataset<PlateData> plateDataDataset = yolo.flatMapGroups(new FlatMapGroupsFunction<String, YOLOIdentifyData, PlateData>() {
+//            @Override
+//            public Iterator<PlateData> call(String key, Iterator<YOLOIdentifyData> values) throws Exception {
+//                //1.一批数据处理的图片
+//                ArrayList<YOLOIdentifyData> sortedList = new ArrayList<>();
+//                while (values.hasNext()) {
+//
+//                    YOLOIdentifyData raw = values.next();
+//                    key = raw.getCameraId();
+//                    log.info(String.format("frames rows*cols(%dX%d) before", raw.getRows(), raw.getCols()));
+//                    log.info("get data" + raw);
+//                    log.info(String.format("frames rows*cols(%dX%d) changed", raw.getRows(), raw.getCols()));
+//                    sortedList.add(raw);
+//                }
+//                sortedList.sort((o1, o2) ->
+//                        (int) (o1.getTimestamp().getTime() - o2.getTimestamp().getTime()));
+//                logger.warn("the all data is " + sortedList.size());
+//                //2.进行车牌识别
+//                List<PlateData> pr = PlateProcessing.process(key, sortedList, false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
+//                //保存数据结果
+//                ImageProcess.changeAndAnnotateImage(sortedList, pr, sortedList, new Size(640, 480));
+//                return pr.iterator();
+//            }
+//
+//
+//        }, Encoders.bean(PlateData.class));
+////
+        Dataset<Row> djson = dfTrack.map(new MapFunction<YOLOIdentifyData, Tuple2<String, String>>() {
             @Override
-            public String call(YOLOIdentifyData value) throws Exception {
-                return value.getCameraId();
-            }
-        }, Encoders.STRING());
-
-        Dataset<PlateData> plateDataDataset = yolo.flatMapGroups(new FlatMapGroupsFunction<String, YOLOIdentifyData, PlateData>() {
-            @Override
-            public Iterator<PlateData> call(String key, Iterator<YOLOIdentifyData> values) throws Exception {
-                //1.一批数据处理的图片
-                ArrayList<YOLOIdentifyData> sortedList = new ArrayList<>();
-                while (values.hasNext()) {
-
-                    YOLOIdentifyData raw = values.next();
-                    key = raw.getCameraId();
-                    log.info(String.format("frames rows*cols(%dX%d) before", raw.getRows(), raw.getCols()));
-                    log.info("get data" + raw);
-                    log.info(String.format("frames rows*cols(%dX%d) changed", raw.getRows(), raw.getCols()));
-                    sortedList.add(raw);
-                }
-                sortedList.sort((o1, o2) ->
-                        (int) (o1.getTimestamp().getTime() - o2.getTimestamp().getTime()));
-                logger.warn("the all data is " + sortedList.size());
-                //2.进行车牌识别
-                List<PlateData> pr = PlateProcessing.process(key, sortedList, false);//前面2步只做数据的检测和保存，并没有对input数据产生改动
-                //保存数据结果
-                ImageProcess.changeAndAnnotateImage(sortedList, pr, sortedList, new Size(640, 480));
-                return pr.iterator();
-            }
-
-
-        }, Encoders.bean(PlateData.class));
-
-        Dataset<Row> djson = plateDataDataset.map(new MapFunction<PlateData, Tuple2<String, String>>() {
-            @Override
-            public Tuple2<String, String> call(PlateData pd) throws Exception {
-
-
+            public Tuple2<String, String> call(YOLOIdentifyData pd) throws Exception {
                 return new Tuple2<>(pd.getCameraId(), pd.toJson());
             }
 

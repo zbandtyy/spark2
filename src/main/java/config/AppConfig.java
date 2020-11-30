@@ -27,7 +27,7 @@ public class AppConfig implements Serializable {
     //			String datacfg = Path+"cfg/coco.data";
     //		String labelpath = Path+"data/labels";
     public static     String YOLO_RESOURCE_PATH="/mnt/hgfs/shared/yoloTest/yolo";
-    public  static    String YOLO_LIB_FILE="/home/user/Apache/yolo/DetectionAndLicenseRecongnition/Detection/libdetection.so";
+    public  static    String YOLO_LIB_FILE="/home/user/Apache/App1/config/yolo/libdetection.so";
     public  static  String HYPERLPR_LIB_PATH="/home/user/Apache/App2/lib/libhyperlprjava.so";
     public  static  String HYPERLPR_RESOURCE_PATH="/home/user/Apache/App2/lib/";//车牌识别参数文件位置
 
@@ -56,6 +56,12 @@ public class AppConfig implements Serializable {
 
                 OPENCV_LIB_FILE = prop.getProperty("opencv.lib.path");
             }
+            if(prop.getProperty("yolo.lib.file") != null){
+
+                YOLO_LIB_FILE = prop.getProperty("yolo.lib.file");
+                System.out.println(YOLO_LIB_FILE);
+            }
+
             if(prop.getProperty("yolo.label.file") != null){
 
                 YOLO_LABEL_FILE = prop.getProperty("yolo.label.file");

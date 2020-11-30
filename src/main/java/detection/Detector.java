@@ -61,11 +61,12 @@ public class Detector implements Serializable {
 
     static {
         //System.load("/home/kfch/Downloads/0924/0925/Detector-v6/libjdetection.so");
+
         System.load(AppConfig.YOLO_LIB_FILE);
         //System.loadlibrary("libjdetection");
     }
 
-    private  static Detector uniqueDetector  = null;
+    private volatile static Detector uniqueDetector  = null;
     public  static Detector getYoloDetector(String Path) {
 
         if (uniqueDetector == null) {

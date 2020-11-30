@@ -31,7 +31,7 @@ public class ImageProcess {
         //NOTE：更好的是传递videoEventdata进行修改
         //1.根据yolo识别的结果对车牌识别pr进行更新，主要是更新车牌绘制的位置为车辆的上方，如果不需要更改位置，则不用动
         PlateProcessing.updatePlatePos(process,pr);
-        //2.绘制yolo识别结果 ，对数据的大小进行更改，共享data数据
+        //2.绘制yolo识别结果 ，对数据的大小进行更改，共享data数据，把input 调整了大小 同时标注了yolo 的jpg数组
         YOLOv3Recoginize.annoteScaleImage(process,size,input);
         //3.绘制车牌识别pr结果，对数据的大小进行更改，一样的绘制  ，3-4的位置不能进行交换
         PlateProcessing.annoteScaleImage(pr,size,input);
@@ -40,7 +40,7 @@ public class ImageProcess {
     }
     public static ArrayList<VideoEventData> loadAndSortData(Iterator<? extends VideoEventData> frames) {
         //Add frames to list
-        log.warn("sorted by timestamp");
+         log.warn("sorted by timestamp");
         //2.一批数据处理的图片
         ArrayList<VideoEventData> sortedList = new ArrayList<>();
         while (frames.hasNext()) {

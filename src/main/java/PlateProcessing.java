@@ -307,7 +307,7 @@ public class PlateProcessing {
 
     /***
      *
-     * @param resAll
+     * @param resAll 未进行任何处理的原始图片
      * @param size
      * @param inList，inList的图片数据已经经过yolo标注的图片，这里使用该图片重新进行车牌的标注
      *              就重新制定 size是要求输出的分辨率，
@@ -320,6 +320,7 @@ public class PlateProcessing {
         //1.获取数据，对数据车牌绘制位置进行更改
         int i = 0;
         for (PlateData plateData : resAll) {
+            //inList的大小为 640 * 480 * 3为更改后的图片
             if(inList != null && inList.size() == resAll.size()) {
                 plateData.setJpgImageBytes(inList.get(i).getImagebytes());
             }
@@ -392,7 +393,7 @@ public class PlateProcessing {
                     MatOfByte mob = new MatOfByte();
                     Imgcodecs.imencode(".jpg", frame, mob);
                     resAll[i].setJpgImageBytes( mob.toArray()); //更新新的编辑图片数据,只需要更新由车牌的数据
-                   // Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"has-pred.jpg",frame);
+                    Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"has-plate.jpg",frame);
                 }
               //  Imgcodecs.imwrite("/home/user/Apache/App2/tracker/output/yolo/"+resAll[i].getTimestamp()+"res.jpg",frame);
 
